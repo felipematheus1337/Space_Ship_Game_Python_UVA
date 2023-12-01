@@ -10,8 +10,18 @@ y = 720
 screen = pygame.display.set_mode((x, y))
 pygame.display.set_caption('SpaceShip Game')
 
-bg = pygame.image.load('images/fundo2.jpg').convert_alpha()
+bg = pygame.image.load('images/bg.jpg').convert_alpha()
 bg = pygame.transform.scale(bg, (x, y))
+
+bg2 = pygame.image.load('images/fundo2.jpg').convert_alpha()
+bg2 = pygame.transform.scale(bg2, (x, y))
+
+backgrounds = [bg, bg2]
+
+background_index = 0
+change_interval = 2100
+
+background = bg
 
 alien = pygame.image.load('images/spaceship.png').convert_alpha()
 alien = pygame.transform.scale(alien, (50, 50))
@@ -34,6 +44,9 @@ vel_x_missil = 0
 pos_x_missil = 200
 pos_y_missil = 300
 
+clock = pygame.time.Clock()
+frame_count = 0
+
 rodando = True
 
 triggered = False
@@ -46,10 +59,18 @@ pontos = 10
 
 font = pygame.font.SysFont('freesans', 50)
 
+
 def respawn():
     x1 = 1350
     y1 = random.randint(1, 640)
     return [x1, y1]
+
+
+def changeScenario():
+    if not background:
+        return bg
+    else:
+        return bg2
 
 
 def respawn_missil():
@@ -58,6 +79,7 @@ def respawn_missil():
     respawn_missil_y = pos_player_y
     vel_x_missil = 0
     return [respawn_missil_x, respawn_missil_y, triggered, vel_x_missil]
+
 
 def colisions():
     global pontos
@@ -76,12 +98,18 @@ while rodando:
         if event.type == pygame.QUIT:
             rodando = False
 
-    screen.blit(bg, (0, 0))
+    frame_count += 1
 
-    rel_x = x % bg.get_rect().width
-    screen.blit(bg, (rel_x - bg.get_rect().width, 0))
+    if frame_count % change_interval == 0:
+        background_index = (background_index + 1) % len(backgrounds)
+        background = backgrounds[background_index]
+
+    screen.blit(background, (0, 0))
+
+    rel_x = x % background.get_rect().width
+    screen.blit(background, (rel_x - background.get_rect().width, 0))
     if rel_x < 1280:
-        screen.blit(bg, (rel_x, 0))
+        screen.blit(background, (rel_x, 0))
 
     tecla = pygame.key.get_pressed()
 
@@ -127,9 +155,9 @@ while rodando:
 
     pos_x_missil += vel_x_missil
 
-    pygame.draw.rect(screen, (255, 0, 0), player_rect, 4)
-    pygame.draw.rect(screen, (255, 0, 0), missil_rect, 4)
-    pygame.draw.rect(screen, (255, 0, 0), alien_rect, 4)
+    pygame.draw.rect(screen, (200, 200, 200), player_rect, 4)
+    pygame.draw.rect(screen, (200, 200, 200), missil_rect, 4)
+    pygame.draw.rect(screen, (200, 200, 200), alien_rect, 4)
 
     score = font.render(f'Pontos: {int(pontos)}', True, (0, 0, 0))
     screen.blit(score, (50, 50))
